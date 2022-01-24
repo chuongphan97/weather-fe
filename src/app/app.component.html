@@ -105,57 +105,57 @@
     <ng-template #content let-modal>
       <div class="modal-header">
         <h4 class="modal-title">Weather history update</h4>
-        <form [formGroup]="updateForm" >
-          <div class="form-group">
-            <label for="name">Date</label>
-            <input type="text" class="form-control" formControlName='date' id="date" >
-          </div>
-          <div class="form-group">
-            <label for="name">Temperature (K)</label>
-            <input type="text" class="form-control" formControlName='temp' id="temp">
-            <span class="text-danger" *ngIf="updateForm?.controls?.['temp']?.dirty && updateForm && updateForm?.controls?.['temp']?.errors">
-              Temperature is required!
-            </span>
-          </div>
-          <div class="form-group">
-            <label for="name">Max temperature (K)</label>
-            <input type="text" class="form-control" formControlName='tempMax' id="tempMax" placeholder="Temperature max">
-            <span class="text-danger" *ngIf="updateForm?.controls?.['tempMax']?.dirty && updateForm && updateForm?.controls?.['tempMax']?.errors">
-              Max temperature is required!
-            </span>
-          </div>
-          <div class="form-group">
-            <label for="name">Min temperature (K)</label>
-            <input type="text" class="form-control" formControlName='tempMin' id="tempMin" placeholder="Temperature min">
-            <span class="text-danger" *ngIf="updateForm?.controls?.['tempMin']?.dirty && updateForm && updateForm?.controls?.['tempMin']?.errors">
-              Min temperature is required!
-            </span>
-          </div>
-          <div class="form-group">
-            <label for="name">Pressure </label>
-            <input type="text" class="form-control" formControlName='pressure' id="pressure" placeholder="Pressure">
-            <span class="text-danger" *ngIf="updateForm?.controls?.['pressure']?.dirty && updateForm && updateForm?.controls?.['pressure']?.errors">
-              Pressure is required!
-            </span>
-          </div>
-          <div class="form-group">
-            <label for="name">Humidity (%)</label>
-            <input type="text" class="form-control" formControlName='humidity' id="humidity" placeholder="Humidity">
-            <span class="text-danger" *ngIf="updateForm?.controls?.['humidity']?.dirty && updateForm && updateForm?.controls?.['humidity']?.errors">
-              Humidity is required!
-            </span>
-          </div>
-          <div class="form-group">
-            <label for="name">City</label>
-            <input type="text" class="form-control" formControlName='city' id="city" >
-          </div>
-          <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </form>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+          <span aria-hidden="true">&times;</span>
+        </button>
         </div>
         <div class="modal-body">
-          
+          <form [formGroup]="updateForm" >
+            <div class="form-group">
+              <label for="name">Date</label>
+              <input type="text" class="form-control" formControlName='date' id="date" >
+            </div>
+            <div class="form-group">
+              <label for="name">Temperature (K)</label>
+              <input type="text" class="form-control" formControlName='temp' id="temp">
+              <span class="text-danger" *ngIf="updateForm?.controls?.['temp']?.dirty && updateForm && updateForm?.controls?.['temp']?.errors">
+                Temperature is required!
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="name">Max temperature (K)</label>
+              <input type="text" class="form-control" formControlName='tempMax' id="tempMax" placeholder="Temperature max">
+              <span class="text-danger" *ngIf="updateForm?.controls?.['tempMax']?.dirty && updateForm && updateForm?.controls?.['tempMax']?.errors">
+                Max temperature is required!
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="name">Min temperature (K)</label>
+              <input type="text" class="form-control" formControlName='tempMin' id="tempMin" placeholder="Temperature min">
+              <span class="text-danger" *ngIf="updateForm?.controls?.['tempMin']?.dirty && updateForm && updateForm?.controls?.['tempMin']?.errors">
+                Min temperature is required!
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="name">Pressure </label>
+              <input type="text" class="form-control" formControlName='pressure' id="pressure" placeholder="Pressure">
+              <span class="text-danger" *ngIf="updateForm?.controls?.['pressure']?.dirty && updateForm && updateForm?.controls?.['pressure']?.errors">
+                Pressure is required!
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="name">Humidity (%)</label>
+              <input type="text" class="form-control" formControlName='humidity' id="humidity" placeholder="Humidity">
+              <span class="text-danger" *ngIf="updateForm?.controls?.['humidity']?.dirty && updateForm && updateForm?.controls?.['humidity']?.errors">
+                Humidity is required!
+              </span>
+            </div>
+            <div class="form-group">
+              <label for="name">City</label>
+              <input type="text" class="form-control" formControlName='city' id="city" >
+            </div>
+            
+          </form>  
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>

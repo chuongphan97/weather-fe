@@ -163,7 +163,6 @@ getWeatherHistory() {
 
   clear() {
     this.weatherHistories = null;
-    this.toastrService.success("Clear data successfull!")
   }
 
   updateWeatherHistory() {
