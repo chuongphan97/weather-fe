@@ -13,7 +13,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class AppComponent implements OnInit{
   title = 'weather-fe';
-  currentWeather!: CurrentWeatherDTO | null;  
+  currentWeather!: CurrentWeatherDTO | null;
   city!: string | null;
   isC: boolean = true;
   unit: string = "°C";
@@ -31,7 +31,7 @@ export class AppComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
-    
+
   }
 
     onClick(){
@@ -58,7 +58,7 @@ export class AppComponent implements OnInit{
   createWeather() {
     if (this.city !== null || this.city !== "") {
       this.weatherService.createWeather(this.city!).subscribe(
-        res => {          
+        res => {
           this.city = "";
           this.toastrService.success("Succesfull!");
           this.currentWeather = null
@@ -75,7 +75,7 @@ export class AppComponent implements OnInit{
   capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
-  
+
   changeUnit() {
     if (this.isC && this.currentWeather !== null) {
       this.currentWeather!.weather!.tempMax = this.fToC(this.currentWeather!.weather.tempMax)
@@ -151,7 +151,7 @@ getWeatherHistory() {
   generateDatabaseDateTime(date: Date): string {
     return date.toISOString().replace("T"," ").substring(0, 19);
   }
-    
+
   deleteAll() {
     this.weatherService.deleteHistoricalWeather(this.from, this.to).subscribe(
       res => {
@@ -210,5 +210,14 @@ getWeatherHistory() {
       humidity: [weather.humidity, [Validators.required]],
       city: [{value: weather.city.name, disabled: true}, [Validators.required]]
     })
+  }
+
+  delete(weatherId: number) {
+    this.weatherService.deleteHistoricalWeatherById(weatherId).subscribe(
+      res => {
+        this.weatherHistories = this.weatherHistories?.filter(w => w.id != weatherId )!
+        this.toastrService.success("Delete all successfull!")
+      }
+    )
   }
 }
