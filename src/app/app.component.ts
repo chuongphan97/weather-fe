@@ -4,6 +4,7 @@ import { CurrentWeatherDTO } from './dtos/current-weather.dto';
 import { WeatherService } from './services/weather.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WeatherDTO } from './dtos/weather.dto';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -12,35 +13,41 @@ import { WeatherDTO } from './dtos/weather.dto';
 })
 export class AppComponent implements OnInit{
   title = 'weather-fe';
-  currentWeather!: CurrentWeatherDTO;  
-  city!: string;
+  currentWeather!: CurrentWeatherDTO | null;  
+  city!: string | null;
   isC: boolean = true;
   unit: string = "°C";
   closeResult!: string;
-  weatherHistories!: WeatherDTO[];
+  weatherHistories!: WeatherDTO[] | null;
   from!: string;
   to!: string;
+  updateForm!: FormGroup;
 
   constructor(
     private weatherService: WeatherService,
     private toastrService: ToastrService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private formBuilder: FormBuilder
   ) {}
 
   ngOnInit(): void {
     
   }
 
-  onClick(){
+    onClick(){
     if (this.city == null || this.city == "") return;
-    this.weatherService.createWeather(this.city)
     this.weatherService.getCurrentWeather(this.city).subscribe(
       res => {
         this.currentWeather = res
-        this.city = ""
-        this.currentWeather.weather.tempMax = this.kToC(this.currentWeather.weather.tempMax)
-        this.currentWeather.weather.tempMin = this.kToC(this.currentWeather.weather.tempMin)
-        this.currentWeather.weather.temp = this.kToC(this.currentWeather.weather.temp)
+        if (this.isC) {
+          this.currentWeather.weather.tempMax = this.kToC(this.currentWeather.weather.tempMax)
+          this.currentWeather.weather.tempMin = this.kToC(this.currentWeather.weather.tempMin)
+          this.currentWeather.weather.temp = this.kToC(this.currentWeather.weather.temp)
+        } else {
+          this.currentWeather.weather.tempMax = this.kToF(this.currentWeather.weather.tempMax)
+          this.currentWeather.weather.tempMin = this.kToF(this.currentWeather.weather.tempMin)
+          this.currentWeather.weather.temp = this.kToF(this.currentWeather.weather.temp)
+        }
       },
       error => {
         this.toastrService.error("City not found!")
@@ -48,20 +55,37 @@ export class AppComponent implements OnInit{
     )
   }
 
+  createWeather() {
+    if (this.city !== null || this.city !== "") {
+      this.weatherService.createWeather(this.city!).subscribe(
+        res => {          
+          this.city = "";
+          this.toastrService.success("Succesfull!");
+          this.currentWeather = null
+        }
+      )
+    }
+  }
+
+  closeWeather() {
+    this.currentWeather = null
+    this.city = null
+  }
+
   capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
   
   changeUnit() {
-    if (this.isC == true) {
-      this.currentWeather.weather.tempMax = this.fToC(this.currentWeather.weather.tempMax)
-      this.currentWeather.weather.tempMin = this.fToC(this.currentWeather.weather.tempMin)
-      this.currentWeather.weather.temp = this.fToC(this.currentWeather.weather.temp)
+    if (this.isC && this.currentWeather !== null) {
+      this.currentWeather!.weather!.tempMax = this.fToC(this.currentWeather!.weather.tempMax)
+      this.currentWeather!.weather.tempMin = this.fToC(this.currentWeather!.weather.tempMin)
+      this.currentWeather!.weather.temp = this.fToC(this.currentWeather!.weather.temp)
       this.unit = "°C";
     } else {
-      this.currentWeather.weather.tempMax = this.cToF(this.currentWeather.weather.tempMax)
-      this.currentWeather.weather.tempMin = this.cToF(this.currentWeather.weather.tempMin)
-      this.currentWeather.weather.temp = this.cToF(this.currentWeather.weather.temp)
+      this.currentWeather!.weather.tempMax = this.cToF(this.currentWeather!.weather.tempMax)
+      this.currentWeather!.weather.tempMin = this.cToF(this.currentWeather!.weather.tempMin)
+      this.currentWeather!.weather.temp = this.cToF(this.currentWeather!.weather.temp)
       this.unit = "°F"
     }
   }
@@ -86,10 +110,15 @@ export class AppComponent implements OnInit{
       this.isC = false;
       this.changeUnit();
     }
+
   }
 
   kToC (temp: number): number {
     return (temp - 273);
+  }
+
+  kToF(temp: number): number {
+    return temp*1.8 - 459.7
   }
 
   fToC(temp: number): number {
@@ -100,20 +129,23 @@ export class AppComponent implements OnInit{
     return (temp)*1.8 + 32;
   }
 
-  openXl(content: any) {
-    this.getWeatherHistory();
-    this.modalService.open(content, { size: 'xl' });
+  openBackDropCustomClass(content: any, weather: WeatherDTO) {
+    this.modalService.open(content, {backdropClass: 'light-blue-backdrop'});
+    this.openEditWeatherModal(weather);
   }
 
 getWeatherHistory() {
-    this.from = this.generateDatabaseDateTime(new Date(this.from))
-    this.to = this.generateDatabaseDateTime(new Date(this.to))
-    this.weatherService.getHistoricalWeather(this.from, this.to).subscribe(
-      res => {
-        console.log(this.weatherHistories)
-        this.weatherHistories = res
-      }
-    )
+    if (this.from !== undefined && this.to !== undefined) {
+      this.from = this.generateDatabaseDateTime(new Date(this.from))
+      this.to = this.generateDatabaseDateTime(new Date(this.to))
+      this.weatherService.getHistoricalWeather(this.from, this.to).subscribe(
+        res => {
+          if (res.length !== 0) {
+            this.weatherHistories = res
+          }
+        }
+      )
+    }
   }
 
   generateDatabaseDateTime(date: Date): string {
@@ -121,8 +153,63 @@ getWeatherHistory() {
   }
     
   deleteAll() {
-    this.weatherService.deleteHistoricalWeather(this.from, this.to)
-    this.weatherHistories = [];
-    this.toastrService.success("Successfull!")
+    this.weatherService.deleteHistoricalWeather(this.from, this.to).subscribe(
+      res => {
+        this.weatherHistories = null;
+        this.toastrService.success("Delete all successfull!")
+      }
+    )
+  }
+
+  clear() {
+    this.weatherHistories = null;
+    this.toastrService.success("Clear data successfull!")
+  }
+
+  updateWeatherHistory() {
+    Object.keys(this.updateForm.controls).forEach(key => this.updateForm.controls[key].markAsDirty());
+    if (this.updateForm.invalid) return;
+
+    const { id, date, temp, tempMax, tempMin, pressure, humidity } = this.updateForm.getRawValue();
+    const weatherDTO: WeatherDTO = {
+      date: date,
+      temp: temp,
+      tempMax: tempMax,
+      tempMin: tempMin,
+      pressure: pressure,
+      humidity: humidity
+    } as WeatherDTO
+
+    this.weatherService.updateHistoricalWeather(weatherDTO, id).subscribe(
+      res => {
+        this.toastrService.success("Update weather history successfull!")
+        this.updateForm.reset()
+        this.modalService.dismissAll()
+
+        this.weatherHistories?.forEach(w => {
+          if (w.id === id) {
+            w.temp = temp;
+            w.tempMin = tempMin;
+            w.tempMax = tempMax;
+            w.pressure = pressure;
+            w.humidity = humidity;
+          }
+        })
+      }
+    )
+
+  }
+
+  openEditWeatherModal(weather: WeatherDTO) {
+    this.updateForm = this.formBuilder.group({
+      id: weather.id,
+      date: [{value: weather.date, disabled: true}, {disabled: true}, [Validators.required]],
+      temp: [weather.temp, [Validators.required]],
+      tempMax: [weather.tempMax, [Validators.required]],
+      tempMin: [weather.tempMin, [Validators.required]],
+      pressure: [weather.pressure, [Validators.required]],
+      humidity: [weather.humidity, [Validators.required]],
+      city: [{value: weather.city.name, disabled: true}, [Validators.required]]
+    })
   }
 }

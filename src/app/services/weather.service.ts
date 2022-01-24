@@ -1,7 +1,6 @@
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { __param } from "tslib";
 import { CurrentWeatherDTO } from "../dtos/current-weather.dto";
 import { WeatherDTO } from "../dtos/weather.dto";
 

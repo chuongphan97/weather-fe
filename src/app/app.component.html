@@ -47,6 +47,7 @@
             <h4 class="mb-1 sfw-normal">{{ currentWeather?.city?.name }}, {{ currentWeather?.city?.countryCode }}</h4>
             <p class="mb-2">Current temperature: <strong>{{ (currentWeather?.weather?.temp)?.toFixed(2) }} {{ unit }}</strong></p>
             <p>Max: <strong>{{ (currentWeather?.weather?.tempMax)?.toFixed(2) }} {{ unit }}</strong>, Min: <strong>{{ (currentWeather?.weather?.tempMin)?.toFixed(2) }} {{ unit }}</strong></p>
+            <p>Pressure: <strong>{{ (currentWeather?.weather?.pressure) }}</strong></p>
             <p>Humidity: <strong>{{ (currentWeather?.weather?.humidity)?.toFixed(2) }}%</strong></p>
 
             <div class="d-flex flex-row align-items-center">
@@ -54,6 +55,8 @@
               <!-- <i class="fas fa-cloud fa-3x" style="color: #eee;"></i> -->
               <img *ngIf="currentWeather" src='{{"https://openweathermap.org/img/w/" + currentWeather.weatherDescModels[0].icon + ".png"}}' alt="">
             </div>
+            <button (click)="createWeather()" class="btn btn-warning text-white">Save</button>
+            <button (click)="closeWeather()" class="btn btn-dark text-white ml-3">Close</button>
 
           </div>
         </div>
@@ -61,52 +64,103 @@
       </div>
       <div class="col-md-2 col-lg-3 col-xl-4">
         <div>
-          <p>From: <input (change)="getFromValue($event)" class="ml-1" type="date"></p>
-        </div>
-        <div>
-          <p>To: <input (change)="getToValue($event)" class="ml-4" type="date"></p>
+          <p>From: <input [ngClass]="{'disable-attr' : weatherHistories}" (change)="getFromValue($event)" class="ml-1" type="date"></p>
+          <p>To: <input [ngClass]="{'disable-attr' : weatherHistories}" (change)="getToValue($event)" class="ml-4" type="date"></p>
         </div>
       </div>
       <div class="col-md-2 col-lg-3 col-xl-4">
-        <button class="btn btn-success" (click)="openXl(content)" >Get historical weather</button>
+        <button *ngIf="!weatherHistories" class="btn btn-success" (click)="getWeatherHistory()" >Get historical weather</button>
+        <button *ngIf="weatherHistories" class="btn btn-success mr-3" (click)="getWeatherHistory()" >Reload</button>
+        <button *ngIf="weatherHistories" type="button" class="btn btn-danger mr-3" (click)="deleteAll()">Delete All</button>
+        <button *ngIf="weatherHistories" type="button" class="btn btn-secondary" (click)="clear()">Close table</button>
       </div>
+      <table *ngIf="weatherHistories" class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">City</th>
+            <th scope="col">Temperature(K)</th>
+            <th scope="col">Max temperature(K)</th>
+            <th scope="col">Min temperature(K)</th>
+            <th scope="col">Pressure</th>
+            <th scope="col">Humidity(%)</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let weather of weatherHistories">
+            <th scope="row">{{ weather.date | date }}</th>
+            <td>{{ weather.city.name }}/{{ weather.city.countryCode }}</td>
+            <td>{{ weather.temp }}</td>
+            <td>{{ weather.tempMax }}</td>
+            <td>{{ weather.tempMin }}</td>
+            <td>{{ weather.pressure }}</td>
+            <td>{{ weather.humidity }}</td>
+            <td class="btn btn-info btn-sm d-inline-flex" (click)="openBackDropCustomClass(content, weather)">EDIT</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <ng-template #content let-modal>
       <div class="modal-header">
-        <h4 class="modal-title">Weather historical</h4>
-        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th scope="col">Date</th>
-              <th scope="col">City</th>
-              <th scope="col">Temperature(K)</th>
-              <th scope="col">Max temperature(K)</th>
-              <th scope="col">Min temperature(K)</th>
-              <th scope="col">Humidity(%)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let weather of weatherHistories">
-              <th scope="row">{{ weather.date }}</th>
-              <td>{{ weather.city.name }}/{{ weather.city.countryCode }}</td>
-              <td>{{ weather.temp }}</td>
-              <td>{{ weather.tempMax }}</td>
-              <td>{{ weather.tempMin }}</td>
-              <td>{{ weather.humidity }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" (click)="deleteAll()">Delete All</button>
-        <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
-      </div>
+        <h4 class="modal-title">Weather history update</h4>
+        <form [formGroup]="updateForm" >
+          <div class="form-group">
+            <label for="name">Date</label>
+            <input type="text" class="form-control" formControlName='date' id="date" >
+          </div>
+          <div class="form-group">
+            <label for="name">Temperature (K)</label>
+            <input type="text" class="form-control" formControlName='temp' id="temp">
+            <span class="text-danger" *ngIf="updateForm?.controls?.['temp']?.dirty && updateForm && updateForm?.controls?.['temp']?.errors">
+              Temperature is required!
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="name">Max temperature (K)</label>
+            <input type="text" class="form-control" formControlName='tempMax' id="tempMax" placeholder="Temperature max">
+            <span class="text-danger" *ngIf="updateForm?.controls?.['tempMax']?.dirty && updateForm && updateForm?.controls?.['tempMax']?.errors">
+              Max temperature is required!
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="name">Min temperature (K)</label>
+            <input type="text" class="form-control" formControlName='tempMin' id="tempMin" placeholder="Temperature min">
+            <span class="text-danger" *ngIf="updateForm?.controls?.['tempMin']?.dirty && updateForm && updateForm?.controls?.['tempMin']?.errors">
+              Min temperature is required!
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="name">Pressure </label>
+            <input type="text" class="form-control" formControlName='pressure' id="pressure" placeholder="Pressure">
+            <span class="text-danger" *ngIf="updateForm?.controls?.['pressure']?.dirty && updateForm && updateForm?.controls?.['pressure']?.errors">
+              Pressure is required!
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="name">Humidity (%)</label>
+            <input type="text" class="form-control" formControlName='humidity' id="humidity" placeholder="Humidity">
+            <span class="text-danger" *ngIf="updateForm?.controls?.['humidity']?.dirty && updateForm && updateForm?.controls?.['humidity']?.errors">
+              Humidity is required!
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="name">City</label>
+            <input type="text" class="form-control" formControlName='city' id="city" >
+          </div>
+          <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </form>
+        </div>
+        <div class="modal-body">
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Close</button>
+          <button class="btn btn-info" type="submit" (click)="updateWeatherHistory()">Update</button>
+        </div>
     </ng-template>    
   </div>
 </section>
