@@ -217,6 +217,7 @@ getWeatherHistory() {
       res => {
         this.weatherHistories = this.weatherHistories?.filter(w => w.id != weatherId )!
         this.toastrService.success("Delete all successfull!")
+        if (this.weatherHistories.length === 0) this.weatherHistories = null;
       }
     )
   }

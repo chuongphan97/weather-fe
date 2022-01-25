@@ -33,7 +33,7 @@
                         <h4 class="mb-1 sfw-normal">{{ currentWeather?.city?.name }}, {{ currentWeather?.city?.countryCode }}</h4>
                         <p class="mb-2">Current temperature: <strong>{{ (currentWeather?.weather?.temp)?.toFixed(2) }} {{ unit }}</strong></p>
                         <p>Max: <strong>{{ (currentWeather?.weather?.tempMax)?.toFixed(2) }} {{ unit }}</strong>, Min: <strong>{{ (currentWeather?.weather?.tempMin)?.toFixed(2) }} {{ unit }}</strong></p>
-                        <p>Pressure: <strong>{{ (currentWeather?.weather?.pressure) }}</strong></p>
+                        <p>Pressure: <strong>{{ (currentWeather?.weather?.pressure) }}Pa</strong></p>
                         <p>Humidity: <strong>{{ (currentWeather?.weather?.humidity)?.toFixed(2) }}%</strong></p>
 
                         <div class="d-flex flex-row align-items-center">
@@ -68,8 +68,8 @@
                         <th scope="col">Temperature(K)</th>
                         <th scope="col">Max temperature(K)</th>
                         <th scope="col">Min temperature(K)</th>
-                        <th scope="col">Pressure</th>
-                        <th scope="col">Humidity(%)</th>
+                        <th scope="col">Pressure (Pa)</th>
+                        <th scope="col">Humidity (%)</th>
                         <th scope="col"></th>
                     </tr>
                 </thead>
@@ -81,7 +81,7 @@
                         <td>{{ weather.tempMax }}</td>
                         <td>{{ weather.tempMin }}</td>
                         <td>{{ weather.pressure }}</td>
-                        <td>{{ weather.humidity }}</td>
+                        <td>{{ weather.humidity}}%</td>
                         <td class="btn btn-info btn-sm d-inline-flex mr-1" (click)="openBackDropCustomClass(content, weather)">EDIT</td>
                         <td class="btn btn-dark btn-sm d-inline-flex" (click)="delete(weather.id)">DELETE</td>
                     </tr>
