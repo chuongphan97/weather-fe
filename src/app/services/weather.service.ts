@@ -43,7 +43,7 @@ export class WeatherService {
     }
 
      deleteHistoricalWeatherById(id: number): Observable<void> {
-        return this.httpClient.delete<void>(endpoint+ "/deleteHistoricalWeatherById/" +id)
+        return this.httpClient.delete<void>(endpoint+ "/deleteHistoricalWeather/" +id)
     }
 
 }
