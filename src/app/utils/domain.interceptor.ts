@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 export class DomainInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         // Prepend domain into request url
-        const correctUrl = 'http://weather-onion-app.herokuapp.com/' + req.url;
+        const correctUrl = 'https://weather-onion-app.herokuapp.com/' + req.url;
 
         console.log(correctUrl);
 
