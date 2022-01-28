@@ -1,7 +1,19 @@
 .hide {
-  display: none;
+    display: none;
 }
 
 .disable-attr {
-  pointer-events: none;
+    pointer-events: none;
+}
+
+.size-20 {
+    font-size: 20px;
+}
+
+.size-18 {
+    font-size: 18px;
+}
+
+.table-responsive {
+    max-height: 300px;
 }
