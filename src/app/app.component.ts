@@ -5,6 +5,7 @@ import { WeatherService } from './services/weather.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WeatherDTO } from './dtos/weather.dto';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +23,8 @@ export class AppComponent implements OnInit{
   from!: string;
   to!: string;
   updateForm!: FormGroup;
+  lat!: number;
+  lon!: number;
 
   constructor(
     private weatherService: WeatherService,
@@ -31,7 +34,10 @@ export class AppComponent implements OnInit{
   ) {}
 
   ngOnInit(): void {
-
+    this.getPosition().then(res =>{
+      this.lat=res.lat;
+      this.lon=res.lng;
+    });
   }
 
     onClick(){
@@ -56,8 +62,17 @@ export class AppComponent implements OnInit{
   }
 
   createWeather() {
-    if (this.city !== null || this.city !== "") {
+    if (this.city !== null || this.city !== "" ) {
       this.weatherService.createWeather(this.city!).subscribe(
+        res => {
+          this.city = "";
+          this.toastrService.success("Succesfull!");
+          this.currentWeather = null
+        }
+      )
+    }
+    if(this.currentWeather!==null &&(this.city === null || this.city === "")){
+       this.weatherService.createWeather(this.currentWeather.city.name!).subscribe(
         res => {
           this.city = "";
           this.toastrService.success("Succesfull!");
@@ -143,8 +158,12 @@ getWeatherHistory() {
           if (res.length !== 0) {
             this.weatherHistories = res
           }
+          if(res.length===0){
+              this.toastrService.error("Don't have any weather history in data!")
+          }
         }
       )
+
     }
   }
 
@@ -213,6 +232,7 @@ getWeatherHistory() {
   }
 
   delete(weatherId: number) {
+
     this.weatherService.deleteHistoricalWeatherById(weatherId).subscribe(
       res => {
         this.weatherHistories = this.weatherHistories?.filter(w => w.id != weatherId )!
@@ -221,4 +241,79 @@ getWeatherHistory() {
       }
     )
   }
+
+  getPosition(): Promise<any>
+  {
+    return new Promise((resolve, reject) => {
+
+      navigator.geolocation.getCurrentPosition(resp => {
+
+          resolve({lng: resp.coords.longitude, lat: resp.coords.latitude});
+        },
+        err => {
+          reject(err);
+        });
+    });
+
+  }
+
+  getWeathersAtYourLocation(){
+
+    this.weatherService.getWeathersAtYourLocation(this.lat,this.lon).subscribe(
+      res => {
+        this.currentWeather = res
+        this.city=res.city.name
+        if (this.isC) {
+          this.currentWeather.weather.tempMax = this.kToC(this.currentWeather.weather.tempMax)
+          this.currentWeather.weather.tempMin = this.kToC(this.currentWeather.weather.tempMin)
+          this.currentWeather.weather.temp = this.kToC(this.currentWeather.weather.temp)
+        } else {
+          this.currentWeather.weather.tempMax = this.kToF(this.currentWeather.weather.tempMax)
+          this.currentWeather.weather.tempMin = this.kToF(this.currentWeather.weather.tempMin)
+          this.currentWeather.weather.temp = this.kToF(this.currentWeather.weather.temp)
+        }
+      },
+      error => {
+        this.toastrService.error("City not found!")
+      }
+    )
+  }
+
+  confirmBox(id: number){
+    Swal.fire({
+      title: 'Are you sure want to remove this weather?',
+      text: 'You will not be able to recover this file!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.value) {
+        this.delete(id);
+
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        this.toastrService.error("Cancelled!")
+
+      }
+    })
+  }
+  confirmAllBox(){
+    Swal.fire({
+      title: 'Are you sure want to remove all?',
+      text: 'You will not be able to recover this file!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.value) {
+        this.deleteAll();
+
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        this.toastrService.error("Cancelled!")
+
+      }
+    })
+  }
+
 }

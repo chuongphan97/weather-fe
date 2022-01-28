@@ -46,4 +46,11 @@ export class WeatherService {
         return this.httpClient.delete<void>(endpoint+ "/deleteHistoricalWeather/" +id)
     }
 
+    getWeathersAtYourLocation(lat: number, lon: number): Observable<CurrentWeatherDTO> {
+      return this.httpClient.get<CurrentWeatherDTO>(endpoint+ "/currentLocation", {params: {
+        lat: lat,
+        lon: lon
+    }})
+    }
+
 }
