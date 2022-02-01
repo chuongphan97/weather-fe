@@ -15,7 +15,7 @@
                     </a> &nbsp; &nbsp;
 
                     <a *ngIf="lat === undefined" type="button" title="Loading!">
-                        <i class="fas fa-spinner size-20 mt-2 text-danger"></i>
+                        <i class="fas fa-spinner size-20 mt-2 text-gray"></i>
                     </a>
                     <a *ngIf="lat !== undefined" (click)="getWeathersAtYourLocation()" type="button" title="Check Weather at your location">
                         <i class="fas fa-map-marker-alt size-20 mt-2 text-danger"></i>
