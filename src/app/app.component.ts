@@ -25,12 +25,14 @@ export class AppComponent implements OnInit{
   updateForm!: FormGroup;
   lat!: number;
   lon!: number;
+  defaultTo = new Date();
+  defaultFrom = this.getFirstDateOfMonth();
 
   constructor(
     private weatherService: WeatherService,
     private toastrService: ToastrService,
     private modalService: NgbModal,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +40,7 @@ export class AppComponent implements OnInit{
       this.lat=res.lat;
       this.lon=res.lng;
     });
+    this.loadHistoricalWeather();
   }
 
     onClick(){
@@ -150,13 +153,12 @@ export class AppComponent implements OnInit{
   }
 
 getWeatherHistory() {
-    if (this.from !== undefined && this.to !== undefined) {
-      this.from = this.generateDatabaseDateTime(new Date(this.from))
-      this.to = this.generateDatabaseDateTime(new Date(this.to))
-      this.weatherService.getHistoricalWeather(this.from, this.to).subscribe(
+    if (this.from !== undefined && this.to !== undefined) {      
+      this.weatherService.getHistoricalWeather(this.generateDatabaseDateTime(new Date(this.from)),
+      this.generateDatabaseDateTime(new Date(this.to))).subscribe(
         res => {
           if (res.length !== 0) {
-            this.weatherHistories = res
+            this.weatherHistories = [...res]
           }
           if(res.length===0){
               this.toastrService.error("Don't have any weather history in data!")
@@ -235,8 +237,8 @@ getWeatherHistory() {
 
     this.weatherService.deleteHistoricalWeatherById(weatherId).subscribe(
       res => {
-        this.weatherHistories = this.weatherHistories?.filter(w => w.id != weatherId )!
-        this.toastrService.success("Delete all successfull!")
+        this.weatherHistories = this.weatherHistories?.filter(w => w.id != weatherId)!
+        this.toastrService.success("Delete successfull!")
         if (this.weatherHistories.length === 0) this.weatherHistories = null;
       }
     )
@@ -289,6 +291,8 @@ getWeatherHistory() {
       cancelButtonText: 'No, keep it'
     }).then((result) => {
       if (result.value) {
+        console.log(result);
+        
         this.delete(id);
 
       } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -316,4 +320,22 @@ getWeatherHistory() {
     })
   }
 
+  getFirstDateOfMonth(): Date {
+    let date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), 1)
+  }
+
+  loadHistoricalWeather() {
+    let from = this.generateDatabaseDateTime(new Date(this.defaultFrom.toDateString()));
+    let to = this.generateDatabaseDateTime(new Date(this.defaultTo.toDateString()));
+
+    this.weatherService.getHistoricalWeather(from, to).subscribe(
+      res => {
+        if (res.length !== 0) {
+          console.log('abc')
+          this.weatherHistories = [...res]        
+        }
+      }
+    )
+  }
 }

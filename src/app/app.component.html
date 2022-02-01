@@ -14,7 +14,10 @@
             </span>
                     </a> &nbsp; &nbsp;
 
-                    <a (click)="getWeathersAtYourLocation()" type="button" title="Check Weather at your location">
+                    <a *ngIf="lat === undefined" type="button" title="Loading!">
+                        <i class="fas fa-spinner size-20 mt-2 text-danger"></i>
+                    </a>
+                    <a *ngIf="lat !== undefined" (click)="getWeathersAtYourLocation()" type="button" title="Check Weather at your location">
                         <i class="fas fa-map-marker-alt size-20 mt-2 text-danger"></i>
                     </a>
 
@@ -55,8 +58,8 @@
             </div>
             <div class="col-md-2 col-lg-3 col-xl-4">
                 <div>
-                    <p>From: <input [ngClass]="{'disable-attr' : weatherHistories}" (change)="getFromValue($event)" class="ml-1" type="date"></p>
-                    <p>To: <input [ngClass]="{'disable-attr' : weatherHistories}" (change)="getToValue($event)" class="ml-4" type="date"></p>
+                    <p>From: <input [ngClass]="{'disable-attr' : weatherHistories}" (change)="getFromValue($event)" [ngModel] = "defaultFrom | date: 'yyyy-MM-dd'" class = "ml-1" type="date"></p>
+                    <p>To: <input [ngClass]="{'disable-attr' : weatherHistories}" (change)="getToValue($event)" [ngModel] = "defaultTo | date: 'yyyy-MM-dd'" class="ml-4" type="date"></p>
                 </div>
             </div>
             <div class="col-md-2 col-lg-3 col-xl-4">
